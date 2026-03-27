@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+
+# OpenCode Docker wrapper script
+# Add this directory to your PATH to run OpenCode from anywhere
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Default workspace to current directory if not specified
+WORKSPACE="${OPENCODE_WORKSPACE:-$(pwd)}"
+
+docker run --rm -it \
+    --read-only \
+    --tmpfs /tmp:exec,size=512m \
+    --cap-drop ALL \
+    --security-opt seccomp=unconfined \
+    --memory=2g \
+    --cpus=2 \
+    -v "$PROJECT_DIR/homebase:/app:rw" \
+    -v "$PROJECT_DIR/config:/app/.config/opencode:ro" \
+    -v "$WORKSPACE:/workspace:rw" \
+    -v "$PROJECT_DIR/secrets:/run/secrets:ro" \
+    opencode-cli /workspace "$@"

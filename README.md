@@ -17,6 +17,53 @@ make build
 make run
 ```
 
+### Adding to PATH
+
+A wrapper script is provided in `bin/opencode-docker` that allows you to run the container from anywhere.
+
+#### Bash
+
+Add to your `~/.bashrc`:
+
+```bash
+export PATH="$HOME/git/opencode-docker/bin:$PATH"
+```
+
+Then reload:
+
+```bash
+source ~/.bashrc
+```
+
+#### Fish
+
+Add to your `~/.config/fish/config.fish`:
+
+```fish
+fish_add_path $HOME/git/opencode-docker/bin
+```
+
+Then reload:
+
+```fish
+source ~/.config/fish/config.fish
+```
+
+#### Usage
+
+Once added to your PATH, you can run from any directory:
+
+```bash
+# Run in current directory
+opencode-docker
+
+# Continue a session
+opencode-docker -s ses_2d068fdfaffefxNTts5doK0upT
+
+# Override workspace directory
+OPENCODE_WORKSPACE=/path/to/project opencode-docker
+```
+
 ## Makefile
 
 ```bash

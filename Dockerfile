@@ -1,0 +1,54 @@
+# Build stage: install dependencies
+FROM node:25-slim AS builder
+
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g opencode-ai @upstash/context7-mcp @modelcontextprotocol/server-sequential-thinking
+
+# Runtime stage: minimal image
+FROM node:25-slim
+
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    xvfb \
+    wl-clipboard \
+    xclip \
+    ca-certificates \
+    git \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && rm -rf /var/cache/apt/archives/*
+
+COPY --from=builder /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+RUN usermod -u $USER_UID -o node && \
+    groupmod -g $USER_GID node || true
+
+RUN mkdir -p /app/.local /app/.config/opencode && \
+    chown -R $USER_UID:$USER_GID /app
+
+WORKDIR /app
+
+ENV DISPLAY=:99.0
+ENV HOME=/app
+ENV XDG_CONFIG_HOME=/app/.config
+ENV XDG_DATA_HOME=/app/.local/share
+ENV PATH=/usr/local/bin:$PATH
+
+RUN echo '#!/bin/bash\n\
+Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &\n\
+exec opencode "$@"' > /usr/local/bin/opencode-docker && \
+    chmod +x /usr/local/bin/opencode-docker
+
+USER node
+
+ENTRYPOINT ["opencode-docker"]

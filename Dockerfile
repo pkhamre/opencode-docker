@@ -44,11 +44,8 @@ ENV XDG_CONFIG_HOME=/app/.config
 ENV XDG_DATA_HOME=/app/.local/share
 ENV PATH=/usr/local/bin:$PATH
 
-RUN echo '#!/bin/bash\n\
-Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &\n\
-exec opencode "$@"' > /usr/local/bin/opencode-docker && \
-    chmod +x /usr/local/bin/opencode-docker
+COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
 
 USER node
 
-ENTRYPOINT ["opencode-docker"]
+ENTRYPOINT ["entrypoint.sh"]

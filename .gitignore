@@ -31,3 +31,6 @@ npm-debug.log*
 # Workspace
 workspace/
 homebase/
+
+# Secrets (API keys, credentials)
+secrets/

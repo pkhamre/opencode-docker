@@ -17,9 +17,7 @@ run:
 		-v $(shell pwd)/homebase:/app:rw \
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \
-		-e CONTEXT7_API_KEY=$(CONTEXT7_API_KEY) \
-		-e GOOGLE_APPLICATION_CREDENTIALS=$(GOOGLE_APPLICATION_CREDENTIALS) \
-		-e GOOGLE_VERTEX_LOCATION=us-central1 \
+		-v $(shell pwd)/secrets:/run/secrets:ro \
 		opencode-cli /workspace
 
 shell:
@@ -33,9 +31,9 @@ shell:
 		-v $(shell pwd)/homebase:/app:rw \
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \
-		-e CONTEXT7_API_KEY=$(CONTEXT7_API_KEY) \
-		-e GOOGLE_APPLICATION_CREDENTIALS=$(GOOGLE_APPLICATION_CREDENTIALS) \
-		opencode-cli /bin/bash
+		-v $(shell pwd)/secrets:/run/secrets:ro \
+		--entrypoint /bin/bash \
+		opencode-cli
 
 clean:
 	docker rmi opencode-cli || true

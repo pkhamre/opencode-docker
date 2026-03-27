@@ -126,10 +126,50 @@ This container is configured with multiple layers of security hardening:
 - **Project Files:** Mount `./workspace` to `/workspace` (writable).
 - **Config:** Mount `./config` to `/app/.config/opencode` (read-only) for themes, provider credentials, and custom agent definitions.
 - **Home Base:** Mount `./homebase` to `/app` (writable) for user settings and local state.
+- **Secrets:** Mount `./secrets` to `/run/secrets` (read-only) for API keys and credentials.
 
-## Environment Variables
+## Secrets Management
 
-You can pass various environment variables to the container for different AI providers:
+This project uses file-based secrets instead of environment variables for improved security. Secrets stored in files are:
+- Not visible in `docker inspect`
+- Not exposed in process listings
+- Not leaked in error messages or logs
+
+### Setting Up Secrets
+
+1. Create your secrets directory (already gitignored):
+   ```bash
+   mkdir -p ./secrets
+   chmod 700 ./secrets
+   ```
+
+2. Add your API keys as individual files:
+   ```bash
+   echo "your-api-key" > ./secrets/anthropic_api_key
+   echo "your-api-key" > ./secrets/openai_api_key
+   echo "your-api-key" > ./secrets/context7_api_key
+   chmod 600 ./secrets/*
+   ```
+
+3. The entrypoint script automatically loads all files from `/run/secrets` as environment variables:
+   - Filenames are converted to uppercase
+   - Dashes and dots are replaced with underscores
+   - Example: `anthropic_api_key` becomes `ANTHROPIC_API_KEY`
+
+### Supported Secrets
+
+| Filename | Environment Variable | Provider |
+|----------|---------------------|----------|
+| `anthropic_api_key` | `ANTHROPIC_API_KEY` | Anthropic |
+| `openai_api_key` | `OPENAI_API_KEY` | OpenAI |
+| `context7_api_key` | `CONTEXT7_API_KEY` | Context7 MCP |
+| `google_application_credentials` | `GOOGLE_APPLICATION_CREDENTIALS` | Vertex AI |
+| `aws_access_key_id` | `AWS_ACCESS_KEY_ID` | AWS Bedrock |
+| `aws_secret_access_key` | `AWS_SECRET_ACCESS_KEY` | AWS Bedrock |
+
+## Environment Variables (Legacy)
+
+You can still pass environment variables directly if preferred, but file-based secrets are recommended:
 
 - `ANTHROPIC_API_KEY`
 - `OPENAI_API_KEY`

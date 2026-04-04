@@ -23,6 +23,7 @@ run:
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \
 		-v $(shell pwd)/secrets:/run/secrets:ro \
+		-v $(shell pwd)/superpowers:/app/.superpowers:rw \
 		opencode-cli /workspace
 
 shell:
@@ -39,6 +40,7 @@ shell:
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \
 		-v $(shell pwd)/secrets:/run/secrets:ro \
+		-v $(shell pwd)/superpowers:/app/.superpowers:rw \
 		--entrypoint /bin/bash \
 		opencode-cli
 

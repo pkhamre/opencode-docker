@@ -24,4 +24,5 @@ docker run --rm -it \
     -v "$PROJECT_DIR/config:/app/.config/opencode:ro" \
     -v "$WORKSPACE:/workspace:rw" \
     -v "$HOME/.opencode-docker/secrets:/run/secrets:ro" \
+    -v "$HOME/.opencode-docker/superpowers:/app/.superpowers:rw" \
     opencode-cli /workspace "$@"

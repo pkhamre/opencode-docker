@@ -15,7 +15,8 @@ OpenCode Docker - containerized environment for running OpenCode CLI.
 │   └── skills/         # Custom skills (e.g., frontend-design)
 ├── secrets/            # Local secrets for development (gitignored)
 ├── homebase/           # Local home dir for development (gitignored)
-└── workspace/          # Local workspace for development (gitignored)
+├── workspace/          # Local workspace for development (gitignored)
+└── superpowers/        # Local superpowers dir for development (gitignored)
 ```
 
 ## Running OpenCode

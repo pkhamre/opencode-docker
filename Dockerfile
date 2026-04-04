@@ -33,7 +33,8 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 RUN usermod -u $USER_UID -o node && \
     groupmod -g $USER_GID node || true
 
-RUN mkdir -p /app/.local /app/.config/opencode && \
+RUN mkdir -p /app/.local /app/.local/share /app/.config/opencode /app/.cache && \
+    chmod -R 755 /app/.local /app/.config/opencode /app/.cache && \
     chown -R $USER_UID:$USER_GID /app
 
 WORKDIR /app
@@ -41,6 +42,7 @@ WORKDIR /app
 ENV DISPLAY=:99.0
 ENV HOME=/app
 ENV XDG_CONFIG_HOME=/app/.config
+ENV OPENCODE_CONFIG_DIR=/app/.config/opencode
 ENV XDG_DATA_HOME=/app/.local/share
 ENV PATH=/usr/local/bin:$PATH
 

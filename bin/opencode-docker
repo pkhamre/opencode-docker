@@ -18,6 +18,7 @@ docker run --rm -it \
     --memory=2g \
     --cpus=2 \
     -v "$HOME/.opencode-docker:/app:rw" \
+    -v "$HOME/.gitconfig:/app/.gitconfig:ro" \
     -v "$PROJECT_DIR/config:/app/.config/opencode:ro" \
     -v "$WORKSPACE:/workspace:rw" \
     -v "$HOME/.opencode-docker/secrets:/run/secrets:ro" \

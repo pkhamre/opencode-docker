@@ -267,3 +267,27 @@ You can still pass environment variables directly if preferred, but file-based s
 - `CONTEXT7_API_KEY` (for Context7 MCP)
 - `GOOGLE_APPLICATION_CREDENTIALS` (for Vertex AI)
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (for Bedrock)
+
+## Superpowers Visual Companion
+
+The [Superpowers](https://github.com/obra/superpowers) plugin includes a visual brainstorming companion that runs a local web server for showing mockups, diagrams, and design options in your browser.
+
+### Port Configuration
+
+The visual companion server is exposed on port **42000** by default. This port is:
+
+- Pre-configured in `bin/opencode-docker` and `make run`/`make shell`
+- Set via the `BRAINSTORM_PORT=42000` environment variable
+- Forwarded from the container to your host machine
+
+### Usage
+
+When the Superpowers brainstorming skill starts a server, it will use port 42000. Access it at:
+
+```
+http://localhost:42000
+```
+
+### Changing the Port
+
+To use a different port, update both the `-p` flag and `-e BRAINSTORM_PORT=` value in your `docker run` command or the wrapper scripts.

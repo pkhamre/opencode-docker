@@ -17,6 +17,8 @@ run:
 		--security-opt seccomp=unconfined \
 		--memory=2g \
 		--cpus=2 \
+		-p 42000:42000 \
+		-e BRAINSTORM_PORT=42000 \
 		-v $(shell pwd)/homebase:/app:rw \
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \
@@ -31,6 +33,8 @@ shell:
 		--security-opt seccomp=unconfined \
 		--memory=2g \
 		--cpus=2 \
+		-p 42000:42000 \
+		-e BRAINSTORM_PORT=42000 \
 		-v $(shell pwd)/homebase:/app:rw \
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \

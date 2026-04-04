@@ -12,16 +12,30 @@ This repository provides a Dockerized environment for running the [OpenCode](htt
 ### Quick Start
 
 ```bash
-# Build and run
+# Build the image
 make build
-make run
+
+# Set up your secrets (one-time)
+mkdir -p ~/.opencode-docker/secrets
+echo "your-api-key" > ~/.opencode-docker/secrets/anthropic_api_key
+chmod 600 ~/.opencode-docker/secrets/*
+
+# Run using the wrapper script (recommended)
+bin/opencode-docker
 ```
 
-### Adding to PATH
+### Recommended: Using the Wrapper Script
 
-A wrapper script is provided in `bin/opencode-docker` that allows you to run the container from anywhere.
+The `bin/opencode-docker` script is the recommended way to run OpenCode Docker. It:
 
-#### Bash
+- Persists all data to `~/.opencode-docker/` (sessions, cache, settings)
+- Reads secrets from `~/.opencode-docker/secrets/`
+- Uses the current directory as the workspace
+- Works from any directory once added to your PATH
+
+#### Adding to PATH
+
+##### Bash
 
 Add to your `~/.bashrc`:
 
@@ -35,7 +49,7 @@ Then reload:
 source ~/.bashrc
 ```
 
-#### Fish
+##### Fish
 
 Add to your `~/.config/fish/config.fish`:
 
@@ -64,32 +78,49 @@ opencode-docker -s ses_2d068fdfaffefxNTts5doK0upT
 OPENCODE_WORKSPACE=/path/to/project opencode-docker
 ```
 
+### Data Persistence
+
+When using the wrapper script, all persistent data is stored in `~/.opencode-docker/`:
+
+```
+~/.opencode-docker/
+├── .cache/           # OpenCode cache (plugins, packages)
+├── .local/           # Local state and data
+├── secrets/          # API keys (see Secrets Management below)
+└── ...               # Other OpenCode runtime files
+```
+
+This directory is automatically created on first run.
+
 ## Makefile
+
+The Makefile is primarily for development and testing within this repository:
 
 ```bash
 make build   # Build with auto-detected UID/GID
-make run     # Run container (interactive)
+make run     # Run container (uses ./workspace as working dir)
 make shell   # Shell into container
 make clean   # Remove image
 ```
 
+**Note:** `make run` uses local directories (`./homebase`, `./workspace`, `./secrets`) for development. For regular use, prefer the `bin/opencode-docker` wrapper script which uses `~/.opencode-docker/`.
+
 ## Manual Docker Run
 
-Run the OpenCode CLI with security hardening enabled:
+For advanced users who want to run the container manually:
 
 ```bash
 docker run --rm -it \
   --read-only \
   --tmpfs /tmp:exec,size=512m \
   --cap-drop ALL \
-  --security-opt seccomp:unconfined \
+  --security-opt seccomp=unconfined \
   --memory=2g \
   --cpus=2 \
-  -v ./homebase:/app:rw \
-  -v ./config:/app/.config/opencode:ro \
-  -v ./workspace:/workspace:rw \
-  -e CONTEXT7_API_KEY=$CONTEXT7_API_KEY \
-  -e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
+  -v ~/.opencode-docker:/app:rw \
+  -v /path/to/opencode-docker/config:/app/.config/opencode:ro \
+  -v $(pwd):/workspace:rw \
+  -v ~/.opencode-docker/secrets:/run/secrets:ro \
   opencode-cli /workspace
 ```
 
@@ -99,7 +130,7 @@ docker run --rm -it \
 # Default UID/GID (1000)
 docker build -t opencode-cli .
 
-# With custom UID/GID
+# With custom UID/GID (recommended)
 docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t opencode-cli .
 ```
 
@@ -170,10 +201,23 @@ This container is configured with multiple layers of security hardening:
 
 ## Configuration and Persistence
 
-- **Project Files:** Mount `./workspace` to `/workspace` (writable).
-- **Config:** Mount `./config` to `/app/.config/opencode` (read-only) for themes, provider credentials, and custom agent definitions.
-- **Home Base:** Mount `./homebase` to `/app` (writable) for user settings and local state.
-- **Secrets:** Mount `./secrets` to `/run/secrets` (read-only) for API keys and credentials.
+When using the wrapper script (`bin/opencode-docker`):
+
+| Data | Location | Description |
+|------|----------|-------------|
+| **Home Directory** | `~/.opencode-docker/` | Persistent home for OpenCode (cache, plugins, settings) |
+| **Secrets** | `~/.opencode-docker/secrets/` | API keys (see below) |
+| **Config** | `./config/` (this repo) | OpenCode config, mounted read-only |
+| **Workspace** | Current directory | Your project files, mounted read-write |
+
+When using `make run` (for development):
+
+| Data | Location | Description |
+|------|----------|-------------|
+| **Home Directory** | `./homebase/` | Local persistent home |
+| **Secrets** | `./secrets/` | Local secrets directory |
+| **Config** | `./config/` | OpenCode config |
+| **Workspace** | `./workspace/` | Local workspace |
 
 ## Secrets Management
 
@@ -184,18 +228,18 @@ This project uses file-based secrets instead of environment variables for improv
 
 ### Setting Up Secrets
 
-1. Create your secrets directory (already gitignored):
+1. Create your secrets directory:
    ```bash
-   mkdir -p ./secrets
-   chmod 700 ./secrets
+   mkdir -p ~/.opencode-docker/secrets
+   chmod 700 ~/.opencode-docker/secrets
    ```
 
 2. Add your API keys as individual files:
    ```bash
-   echo "your-api-key" > ./secrets/anthropic_api_key
-   echo "your-api-key" > ./secrets/openai_api_key
-   echo "your-api-key" > ./secrets/context7_api_key
-   chmod 600 ./secrets/*
+   echo "your-api-key" > ~/.opencode-docker/secrets/anthropic_api_key
+   echo "your-api-key" > ~/.opencode-docker/secrets/openai_api_key
+   echo "your-api-key" > ~/.opencode-docker/secrets/context7_api_key
+   chmod 600 ~/.opencode-docker/secrets/*
    ```
 
 3. The entrypoint script automatically loads all files from `/run/secrets` as environment variables:

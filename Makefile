@@ -4,7 +4,10 @@ USER_UID := $(shell id -u)
 USER_GID := $(shell id -g)
 
 build:
-	docker build --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) -t opencode-cli .
+	docker build --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) --no-cache -t opencode-cli .
+
+# Development targets: use local directories (./homebase, ./workspace, ./secrets)
+# For regular use, prefer: bin/opencode-docker (uses ~/.opencode-docker/)
 
 run:
 	docker run --rm -it \

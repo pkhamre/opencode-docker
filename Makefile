@@ -2,6 +2,7 @@
 
 USER_UID := $(shell id -u)
 USER_GID := $(shell id -g)
+BRAINSTORM_PORT := $(shell bash -c 'echo $$((49152 + RANDOM % 16383))')
 
 build:
 	docker build --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) --no-cache -t opencode-cli .
@@ -17,8 +18,9 @@ run:
 		--security-opt seccomp=unconfined \
 		--memory=2g \
 		--cpus=2 \
-		-p 42000:42000 \
-		-e BRAINSTORM_PORT=42000 \
+		-p $(BRAINSTORM_PORT):$(BRAINSTORM_PORT) \
+		-e BRAINSTORM_PORT=$(BRAINSTORM_PORT) \
+		-e BRAINSTORM_HOST=0.0.0.0 \
 		-v $(shell pwd)/homebase:/app:rw \
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \
@@ -34,8 +36,9 @@ shell:
 		--security-opt seccomp=unconfined \
 		--memory=2g \
 		--cpus=2 \
-		-p 42000:42000 \
-		-e BRAINSTORM_PORT=42000 \
+		-p $(BRAINSTORM_PORT):$(BRAINSTORM_PORT) \
+		-e BRAINSTORM_PORT=$(BRAINSTORM_PORT) \
+		-e BRAINSTORM_HOST=0.0.0.0 \
 		-v $(shell pwd)/homebase:/app:rw \
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \

@@ -10,6 +10,9 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 # Default workspace to current directory if not specified
 WORKSPACE="${OPENCODE_WORKSPACE:-$(pwd)}"
 
+# Generate random port in ephemeral range (49152-65534) for brainstorming server
+BRAINSTORM_PORT=$((49152 + RANDOM % 16383))
+
 docker run --rm -it \
     --read-only \
     --tmpfs /tmp:exec,size=512m \
@@ -17,8 +20,9 @@ docker run --rm -it \
     --security-opt seccomp=unconfined \
     --memory=2g \
     --cpus=2 \
-    -p 42000:42000 \
-    -e BRAINSTORM_PORT=42000 \
+    -p "${BRAINSTORM_PORT}:${BRAINSTORM_PORT}" \
+    -e BRAINSTORM_PORT="${BRAINSTORM_PORT}" \
+    -e BRAINSTORM_HOST=0.0.0.0 \
     -v "$HOME/.opencode-docker:/app:rw" \
     -v "$HOME/.gitconfig:/app/.gitconfig:ro" \
     -v "$PROJECT_DIR/config:/app/.config/opencode:ro" \

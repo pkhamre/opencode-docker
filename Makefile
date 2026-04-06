@@ -1,11 +1,17 @@
-.PHONY: build run shell clean
+.PHONY: build run shell clean tag-latest
 
 USER_UID := $(shell id -u)
 USER_GID := $(shell id -g)
 BRAINSTORM_PORT := $(shell bash -c 'echo $$((49152 + RANDOM % 16383))')
 
 build:
-	docker build --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) --no-cache -t opencode-cli .
+	docker build --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) --no-cache -t opencode-docker .
+
+tag-latest:
+ifndef VERSION
+	$(error VERSION is required. Usage: make tag-latest VERSION=1.3.17)
+endif
+	docker tag opencode-docker:$(VERSION) opencode-docker:latest
 
 # Development targets: use local directories (./homebase, ./workspace, ./secrets)
 # For regular use, prefer: bin/opencode-docker (uses ~/.opencode-docker/)

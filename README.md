@@ -97,7 +97,9 @@ This directory is automatically created on first run.
 The Makefile is primarily for development and testing within this repository:
 
 ```bash
-make build   # Build with auto-detected UID/GID
+make build                  # Build with auto-detected UID/GID (tagged as opencode-docker)
+make build VERSION=1.3.17    # Build with version tag (opencode-docker:1.3.17)
+make tag-latest VERSION=1.3.17   # Tag latest to point to a version
 make run     # Run container (uses ./workspace as working dir)
 make shell   # Shell into container
 make clean   # Remove image
@@ -121,17 +123,20 @@ docker run --rm -it \
   -v /path/to/opencode-docker/config:/app/.config/opencode:ro \
   -v $(pwd):/workspace:rw \
   -v ~/.opencode-docker/secrets:/run/secrets:ro \
-  opencode-cli /workspace
+  opencode-docker /workspace
 ```
 
 ### Building the Image Manually
 
 ```bash
 # Default UID/GID (1000)
-docker build -t opencode-cli .
+docker build -t opencode-docker .
 
 # With custom UID/GID (recommended)
-docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t opencode-cli .
+docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t opencode-docker .
+
+# With version tag
+docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t opencode-docker:1.3.17 .
 ```
 
 ## Security Features

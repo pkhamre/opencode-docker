@@ -4,8 +4,10 @@ USER_UID := $(shell id -u)
 USER_GID := $(shell id -g)
 BRAINSTORM_PORT := $(shell bash -c 'echo $$((49152 + RANDOM % 16383))')
 
+VERSION ?=
+
 build:
-	docker build --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) --no-cache -t opencode-docker .
+	docker build --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) --no-cache -t opencode-docker$(if $(VERSION),:$(VERSION),) .
 
 tag-latest:
 ifndef VERSION

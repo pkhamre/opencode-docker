@@ -3,9 +3,10 @@
 USER_UID := $(shell id -u)
 USER_GID := $(shell id -g)
 BRAINSTORM_PORT := $(shell bash -c 'echo $$((49152 + RANDOM % 16383))')
+VERSION ?=
 
 build:
-	docker build --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) --no-cache -t opencode-cli .
+	docker build --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) --no-cache -t opencode-docker$(if $(VERSION),:$(VERSION),) .
 
 # Development targets: use local directories (./homebase, ./workspace, ./secrets)
 # For regular use, prefer: bin/opencode-docker (uses ~/.opencode-docker/)
@@ -25,7 +26,7 @@ run:
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \
 		-v $(shell pwd)/secrets:/run/secrets:ro \
-		opencode-cli /workspace
+		opencode-docker /workspace
 
 shell:
 	docker run --rm -it \
@@ -43,7 +44,7 @@ shell:
 		-v $(shell pwd)/workspace:/workspace:rw \
 		-v $(shell pwd)/secrets:/run/secrets:ro \
 		--entrypoint /bin/bash \
-		opencode-cli
+		opencode-docker
 
 clean:
-	docker rmi opencode-cli || true
+	docker rmi opencode-docker || true

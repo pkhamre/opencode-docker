@@ -33,7 +33,7 @@ run:
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \
 		-v $(shell pwd)/secrets:/run/secrets:ro \
-		opencode-cli /workspace
+		opencode-docker /workspace
 
 shell:
 	docker run --rm -it \
@@ -51,7 +51,7 @@ shell:
 		-v $(shell pwd)/workspace:/workspace:rw \
 		-v $(shell pwd)/secrets:/run/secrets:ro \
 		--entrypoint /bin/bash \
-		opencode-cli
+		opencode-docker
 
 clean:
-	docker rmi opencode-cli || true
+	docker rmi opencode-docker || true

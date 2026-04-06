@@ -33,5 +33,9 @@ workspace/
 homebase/
 superpowers/
 
+# Worktrees
+.worktrees/
+worktrees/
+
 # Secrets (API keys, credentials)
 secrets/

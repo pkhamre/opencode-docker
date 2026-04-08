@@ -3,6 +3,9 @@ set -e
 
 # OpenCode Docker wrapper script
 # Add this directory to your PATH to run OpenCode from anywhere
+#
+# Options:
+#   -b, --brainstorm    Enable brainstorming server (exposes port for real-time collaboration)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
@@ -10,8 +13,23 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 # Default workspace to current directory if not specified
 WORKSPACE="${OPENCODE_WORKSPACE:-$(pwd)}"
 
-# Generate random port in ephemeral range (49152-65534) for brainstorming server
-BRAINSTORM_PORT=$((49152 + RANDOM % 16383))
+BRAINSTORM_PORT=""
+BRAINSTORM_HOST=""
+PORT_MAPPING=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -b|--brainstorm)
+            BRAINSTORM_PORT=$((49152 + RANDOM % 16383))
+            BRAINSTORM_HOST="0.0.0.0"
+            PORT_MAPPING="-p ${BRAINSTORM_PORT}:${BRAINSTORM_PORT}"
+            shift
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
 docker run --rm -it \
     --read-only \
@@ -20,9 +38,9 @@ docker run --rm -it \
     --security-opt seccomp=unconfined \
     --memory=2g \
     --cpus=2 \
-    -p "${BRAINSTORM_PORT}:${BRAINSTORM_PORT}" \
-    -e BRAINSTORM_PORT="${BRAINSTORM_PORT}" \
-    -e BRAINSTORM_HOST=0.0.0.0 \
+    ${PORT_MAPPING} \
+    ${BRAINSTORM_PORT:+-e BRAINSTORM_PORT="${BRAINSTORM_PORT}"} \
+    ${BRAINSTORM_HOST:+-e BRAINSTORM_HOST="${BRAINSTORM_HOST}"} \
     -v "$HOME/.opencode-docker:/app:rw" \
     -v "$HOME/.gitconfig:/app/.gitconfig:ro" \
     -v "$PROJECT_DIR/config:/app/.config/opencode:ro" \

@@ -1,4 +1,4 @@
-.PHONY: build run shell clean tag-latest
+.PHONY: build build-latest run shell clean tag-latest
 
 USER_UID := $(shell id -u)
 USER_GID := $(shell id -g)
@@ -13,6 +13,12 @@ ifndef VERSION
 	$(error VERSION is required. Usage: make tag-latest VERSION=1.3.17)
 endif
 	docker tag opencode-docker:$(VERSION) opencode-docker:latest
+
+build-latest:
+	@VERSION=$$(npm view opencode-ai version) && \
+	echo "Building opencode-docker:$$VERSION..." && \
+	$(MAKE) build VERSION=$$VERSION && \
+	$(MAKE) tag-latest VERSION=$$VERSION
 
 # Development targets: use local directories (./homebase, ./workspace, ./secrets)
 # For regular use, prefer: bin/opencode-docker (uses ~/.opencode-docker/)

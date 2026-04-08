@@ -2,6 +2,10 @@
 
 This repository provides a Dockerized environment for running the [OpenCode](https://opencode.ai) CLI in an isolated container. It includes all necessary dependencies for clipboard support and headless execution.
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/chart?repos=pkhamre/opencode-docker&type=timeline&legend=top-left)](https://www.star-history.com/?repos=pkhamre%2Fopencode-docker&type=timeline&legend=top-left)
+
 ## Getting Started
 
 ### Prerequisites

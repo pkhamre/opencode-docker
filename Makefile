@@ -27,8 +27,8 @@ run:
 	docker run --rm -it \
 		--read-only \
 		--tmpfs /tmp:exec,size=512m \
-		--cap-drop ALL \
-		--security-opt seccomp=unconfined \
+		--cap-drop=ALL \
+		--security-opt=no-new-privileges \
 		--memory=2g \
 		--cpus=2 \
 		-p $(BRAINSTORM_PORT):$(BRAINSTORM_PORT) \
@@ -38,14 +38,14 @@ run:
 		-v $(shell pwd)/config:/app/.config/opencode:ro \
 		-v $(shell pwd)/workspace:/workspace:rw \
 		-v $(shell pwd)/secrets:/run/secrets:ro \
-		opencode-docker /workspace
+		opencode-docker:latest /workspace
 
 shell:
 	docker run --rm -it \
 		--read-only \
 		--tmpfs /tmp:exec,size=512m \
-		--cap-drop ALL \
-		--security-opt seccomp=unconfined \
+		--cap-drop=ALL \
+		--security-opt=no-new-privileges \
 		--memory=2g \
 		--cpus=2 \
 		-p $(BRAINSTORM_PORT):$(BRAINSTORM_PORT) \
@@ -56,7 +56,7 @@ shell:
 		-v $(shell pwd)/workspace:/workspace:rw \
 		-v $(shell pwd)/secrets:/run/secrets:ro \
 		--entrypoint /bin/bash \
-		opencode-docker
+		opencode-docker:latest
 
 clean:
 	docker rmi opencode-docker || true

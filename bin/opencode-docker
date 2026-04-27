@@ -1,14 +1,12 @@
-#!/bin/bash
-set -e
-
+#!/usr/bin/env bash
+#
 # OpenCode Docker wrapper script
 # Add this directory to your PATH to run OpenCode from anywhere
 #
 # Options:
 #   -b, --brainstorm    Enable brainstorming server (exposes port for real-time collaboration)
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+set -e
 
 # Default workspace to current directory if not specified
 WORKSPACE="${OPENCODE_WORKSPACE:-$(pwd)}"
@@ -31,11 +29,17 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-docker run --rm -it \
-    --read-only \
-    --tmpfs /tmp:exec,size=512m \
-    --cap-drop ALL \
-    --security-opt seccomp=unconfined \
+if [ -t 0 ]; then
+    DOCKER_FLAGS="-it"
+else
+    DOCKER_FLAGS="-i"
+fi
+
+docker run --rm $DOCKER_FLAGS \
+	--read-only \
+	--tmpfs /tmp:exec,size=512m \
+    --cap-drop=ALL \
+    --security-opt=no-new-privileges \
     --memory=2g \
     --cpus=2 \
     ${PORT_MAPPING} \
@@ -43,7 +47,7 @@ docker run --rm -it \
     ${BRAINSTORM_HOST:+-e BRAINSTORM_HOST="${BRAINSTORM_HOST}"} \
     -v "$HOME/.opencode-docker:/app:rw" \
     -v "$HOME/.gitconfig:/app/.gitconfig:ro" \
-    -v "$PROJECT_DIR/config:/app/.config/opencode:ro" \
-    -v "$WORKSPACE:/workspace:rw" \
+    -v "$HOME/.config/opencode:/app/.config/opencode:ro" \
     -v "$HOME/.opencode-docker/secrets:/run/secrets:ro" \
-    opencode-docker /workspace "$@"
+    -v "$WORKSPACE:/workspace:rw" \
+    opencode-docker:latest /workspace "$@"

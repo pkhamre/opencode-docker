@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+# OpenCode Docker wrapper script
+# Add this directory to your PATH to run OpenCode from anywhere
+
+# Default workspace to current directory if not specified
+WORKSPACE="${OPENCODE_WORKSPACE:-$(pwd)}"
+
+if [ -t 0 ]; then
+    DOCKER_FLAGS="-it"
+else
+    DOCKER_FLAGS="-i"
+fi
+
+docker run --rm $DOCKER_FLAGS \
+    --cap-drop=ALL \
+    --security-opt=no-new-privileges \
+    --memory=2g \
+    --cpus=2 \
+    -v "$HOME/.opencode-docker:/app:rw" \
+    -v "$HOME/.gitconfig:/app/.gitconfig:ro" \
+    -v "$HOME/.config/opencode:/app/.config/opencode:ro" \
+    -v "$WORKSPACE:/workspace:rw" \
+    -v "$HOME/.opencode-docker/secrets:/run/secrets:ro" \
+    opencode-docker:latest /workspace "$@"

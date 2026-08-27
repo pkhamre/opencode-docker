@@ -198,7 +198,6 @@ OPENCODE_SERVER_PASSWORD=s3cret opencode-docker --web 8080
 - The port is published on `127.0.0.1` only — reachable from your machine, not your network.
 - The default password is public knowledge; set a strong one if that matters to you. Note that the password is visible in `docker inspect` for the container's lifetime (API keys are unaffected — those still load from secret files).
 - Anyone with the URL and password can run agents in your workspace. Don't tunnel it unauthenticated.
-- A containerized reverse proxy can't reach a loopback publish — for nginx/Compose fronting, run the OpenCode service on a Compose network without a host publish instead.
 
 ### Development Commands
 

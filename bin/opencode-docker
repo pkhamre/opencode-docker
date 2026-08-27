@@ -10,6 +10,10 @@
 #   --memory            Set memory limit (default: 4g, e.g., --memory 8g)
 #   --cpus              Set CPU count (default: 4, e.g., --cpus 8)
 #   --host-access       Add host.docker.internal so the container can reach host services
+#   --web [port]        Run the web UI (opencode serve) instead of the TUI.
+#                       Bare --web picks a random ephemeral port; --web 8080
+#                       uses that port. Password: OPENCODE_SERVER_PASSWORD
+#                       env var, default "opencode". URL printed at startup.
 #
 # Any other flags/commands (e.g. -m/--model, -c/--continue, -s/--session,
 # auth logout, run "msg") are passed through to the OpenCode CLI.
@@ -40,6 +44,8 @@ EXTRA_ENV=()
 HOST_ARGS=()
 MEMORY_LIMIT="${MEMORY_LIMIT:-4g}"
 CPU_LIMIT="${CPU_LIMIT:-4}"
+WEB_PORT=""
+WEB_PASSWORD="${OPENCODE_SERVER_PASSWORD:-opencode}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -69,11 +75,42 @@ while [[ $# -gt 0 ]]; do
             HOST_ARGS+=(--add-host "host.docker.internal:host-gateway")
             shift
             ;;
+        --web)
+            WEB_PORT="$((49152 + RANDOM % 16383))"
+            if [[ "$#" -ge 2 && "$2" =~ ^(0|[1-9][0-9]{0,4})$ ]]; then
+                WEB_PORT="$2"
+                shift
+            elif [[ "$#" -ge 2 && "$2" != -* ]]; then
+                echo "error: --web requires a numeric port, got '$2'" >&2
+                exit 2
+            fi
+            shift
+            ;;
         *)
             break
             ;;
     esac
 done
+
+WEB_ARGS=()
+if [ -n "$WEB_PORT" ]; then
+    if [ "$WEB_PORT" -lt 1 ] || [ "$WEB_PORT" -gt 65535 ]; then
+        echo "error: --web port out of range 1-65535: $WEB_PORT" >&2
+        exit 2
+    fi
+    if [ "$#" -gt 0 ]; then
+        echo "error: unexpected arguments with --web: $*" >&2
+        exit 2
+    fi
+    set -- serve --hostname 0.0.0.0 --port "$WEB_PORT"
+    WEB_ARGS+=(-p "127.0.0.1:${WEB_PORT}:${WEB_PORT}" --env "OPENCODE_SERVER_PASSWORD=${WEB_PASSWORD}")
+    echo "Web UI: http://localhost:${WEB_PORT}"
+    if [ "${OPENCODE_SERVER_PASSWORD:-}" ]; then
+        echo "Auth:   using OPENCODE_SERVER_PASSWORD from environment"
+    else
+        echo "Auth:   password 'opencode' (set OPENCODE_SERVER_PASSWORD to override)"
+    fi
+fi
 
 if [ -d "$repo_dir/config" ]; then
   if [ "$UPDATE_CONFIG" = 1 ]; then
@@ -109,6 +146,7 @@ docker run --rm $DOCKER_FLAGS \
     --cpus="${CPU_LIMIT}" \
     "${ENV_ARGS[@]}" \
     "${HOST_ARGS[@]}" \
+    "${WEB_ARGS[@]}" \
     -v "$HOME/.opencode-docker:/app:rw" \
     "${GITCONFIG_MOUNT[@]}" \
     -v "$HOME/.opencode-docker/config:/app/.config/opencode:rw" \

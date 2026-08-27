@@ -55,6 +55,7 @@ The `bin/opencode-docker` script is the recommended way to run OpenCode Docker. 
 | `--memory` | `4g` | Container memory limit |
 | `--cpus` | `4` | Container CPU count |
 | `--host-access` | off | Add `host.docker.internal` so the container can reach host services (see [Accessing Host Services](#accessing-host-services)) |
+| `--web` | random port | Run the web UI (`opencode serve`) instead of the TUI; `--web 8080` picks the port (see [Web UI](#web-ui)) |
 
 Everything else is passed through to the OpenCode CLI — including short flags like `-m`/`--model`, `-c`/`--continue`, and `-s`/`--session`, as well as subcommands. Run `opencode-docker --help` to see them all.
 
@@ -176,6 +177,28 @@ Inside the container, reach host ports via `http://host.docker.internal:<port>`.
   }
 }
 ```
+
+### Web UI
+
+Run OpenCode as a local web server instead of the terminal TUI:
+
+```bash
+opencode-docker --web            # random ephemeral port
+opencode-docker --web 8080       # fixed port
+```
+
+The launcher prints the URL (e.g. `http://localhost:8080`). The server requires a password via `OPENCODE_SERVER_PASSWORD`; the default is `opencode`. Override it on the host before launching:
+
+```bash
+OPENCODE_SERVER_PASSWORD=s3cret opencode-docker --web 8080
+```
+
+**Security notes:**
+
+- The port is published on `127.0.0.1` only — reachable from your machine, not your network.
+- The default password is public knowledge; set a strong one if that matters to you. Note that the password is visible in `docker inspect` for the container's lifetime (API keys are unaffected — those still load from secret files).
+- Anyone with the URL and password can run agents in your workspace. Don't tunnel it unauthenticated.
+- A containerized reverse proxy can't reach a loopback publish — for nginx/Compose fronting, run the OpenCode service on a Compose network without a host publish instead.
 
 ### Development Commands
 

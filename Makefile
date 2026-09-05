@@ -54,4 +54,4 @@ clean:
 	$(ENGINE) rmi opencode-container || true
 
 prune-cache:
-	$(ENGINE) builder prune -af
+	$(ENGINE) builder prune -f
